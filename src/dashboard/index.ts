@@ -56,8 +56,13 @@ export class Dashboard implements IDashboard {
   public async handleDashboardAPI(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
     const apiPrefix = `${this.config.dashboard.path}/api`;
-
-    const apiPath = pathname.slice(apiPrefix.length);
+    /**
+     * Get dashboard/api routes:
+     * metrices
+     * dashboard-data
+     *
+     */
+    const apiPath = pathname.slice(apiPrefix.length + 1);
 
     if (apiPath === "/metrics") {
       const searchParams = request.nextUrl.searchParams;

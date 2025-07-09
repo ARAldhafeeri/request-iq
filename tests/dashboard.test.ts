@@ -120,4 +120,32 @@ describe("Dashboard", () => {
     expect(storage.getMetrics).toHaveBeenCalled();
     expect(spy).not.toHaveBeenCalled(); // not called unless path is dashboard-data
   });
+
+  it("should log the actual config path value", () => {
+    expect(config.dashboard.path).toBeDefined();
+  });
+
+  it("should handle different path configurations", async () => {
+    const testCases = [
+      { path: "/requestiq", url: "http://localhost/requestiq/api/metrics" },
+      { path: "requestiq", url: "http://localhost/requestiq/api/metrics" },
+      { path: "/requestiq/", url: "http://localhost/requestiq/api/metrics" },
+      { path: "", url: "http://localhost/api/metrics" },
+      { path: "/", url: "http://localhost/api/metrics" },
+    ];
+
+    for (const testCase of testCases) {
+      config.dashboard.path = testCase.path;
+      config.dashboard.enableAuth = false;
+
+      const req = mockRequest(testCase.url);
+      const expectedPrefix = `${testCase.path}/api/`;
+
+      const res = await dashboard.handleDashboard(req);
+
+      if (req.nextUrl.pathname.startsWith(expectedPrefix)) {
+        expect(res.status).not.toBe(404);
+      }
+    }
+  });
 });
