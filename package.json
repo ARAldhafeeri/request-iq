@@ -1,0 +1,56 @@
+{
+  "name": "request-iq",
+  "version": "1.0.0",
+  "description": "Minimal serverless-friendly middleware for tracking endpoint performance and latency. Comes with simple clean analytics dashboard without paying any premium price, it's simply free.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "prepare": "npm run build",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "nextjs",
+    "analytics",
+    "middleware",
+    "typescript"
+  ],
+  "author": "Ahmed Rakan",
+  "license": "MIT",
+  "peerDependencies": {
+    "next": "^13.0.0 || ^14.0.0 || ^15.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.6.3",
+    "@typescript-eslint/eslint-plugin": "^6.7.2",
+    "@typescript-eslint/parser": "^6.7.2",
+    "eslint": "^8.49.0",
+    "jest": "^29.7.0",
+    "next": "^14.0.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ARAldhafeeri/request-iq.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ARAldhafeeri/request-iq/issues"
+  },
+  "homepage": "https://github.com/ARAldhafeeri/request-iq#readme",
+  "dependencies": {
+    "@upstash/redis": "^1.35.1",
+    "uuid": "^11.1.0"
+  }
+}
