@@ -50,7 +50,6 @@
   },
   "homepage": "https://github.com/ARAldhafeeri/request-iq#readme",
   "dependencies": {
-    "@upstash/redis": "^1.35.1",
-    "uuid": "^11.1.0"
+    "@upstash/redis": "^1.35.1"
   }
 }

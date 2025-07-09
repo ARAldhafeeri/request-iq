@@ -23,6 +23,8 @@ export const defaultConfig: RequestIQConfig = {
     enableAuth: false,
   },
   storage: {
+    keyPrefix: "test-analytics",
+    slowThreshold: 1000,
     retentionDays: 7,
     batchSize: 100,
   },
@@ -39,6 +41,6 @@ export function createRequestIQ(config: RequestIQConfig) {
     createRedisClient(config.redis.url, config.redis.token)
   );
   const metrices = new Metrices(config, sampler, storage);
-  const dashboard = new Dashboard(config, auth, storage, metrices);
+  const dashboard = new Dashboard(config, auth, storage);
   return new RequestIQMiddleware(config, sampler, dashboard, metrices);
 }

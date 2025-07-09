@@ -26,48 +26,65 @@ export interface RequestIQConfig {
   storage: {
     retentionDays: number; // How many days to keep metrics data
     batchSize: number; // Batch size for storage operations
+    keyPrefix?: string; // Prefix for storing the keys in redis
+    slowThreshold?: number; // acceptable latency for each request
   };
   excludePaths?: string[]; // Path patterns to exclude from monitoring
   includeHeaders?: string[]; // Specific headers to include in metrics
 }
 
 /**
- * Interface representing collected request metrics
- * Contains all data captured about each HTTP request
+ * Anlaytics payload
  */
-export interface RequestMetrics {
-  id: string; // Unique request identifier
-  timestamp: number; // Unix timestamp of request
-  path: string; // Request URL path
-  method: string; // HTTP method (GET, POST, etc.)
-  statusCode: number; // HTTP response status code
-  duration: number; // Request duration in milliseconds
-  userAgent?: string; // User-Agent header value
-  ip?: string; // Client IP address
-  country?: string; // GeoIP-detected country
-  headers?: Record<string, string>; // Selected HTTP headers
-  query?: Record<string, string>; // URL query parameters
-  error?: string; // Error message if request failed
+export interface AnalyticsData {
+  timestamp: number;
+  path: string;
+  method: string;
+  statusCode: number;
+  duration: number;
+  country?: string;
+  userAgent?: string;
+  ip?: string;
 }
 
 /**
- * Interface for dashboard statistical data
- * Represents aggregated metrics shown in the monitoring dashboard
+ * Window for batch size
  */
-export interface DashboardData {
-  totalRequests: number; // Total requests in time period
-  averageLatency: number; // Average request duration
-  slowRequests: number; // Count of slow requests
-  errorRate: number; // Percentage of errored requests
-  requestsByPath: Record<string, number>; // Request count by path
-  latencyPercentiles: {
-    // Latency distribution percentiles
-    p50: number; // 50th percentile (median)
-    p90: number; // 90th percentile
-    p95: number; // 95th percentile
-    p99: number; // 99th percentile
+export interface TimeWindow {
+  start: number;
+  end: number;
+  bucket: "minute" | "hour" | "day";
+}
+
+/**
+ * Anlaytics filters
+ */
+export interface QueryFilters {
+  timeWindow?: TimeWindow;
+  path?: string;
+  statusCode?: number | number[];
+  country?: string;
+  method?: string;
+}
+
+/**
+ * Dashboard data
+ */
+export interface MetricsResult {
+  totalRequests: number;
+  slowRequests: number;
+  errorRate: number;
+  percentiles: {
+    p50: number;
+    p90: number;
+    p95: number;
+    p99: number;
   };
-  recentRequests: RequestMetrics[]; // List of most recent requests
+  averageDuration: number;
+  topPaths: Array<{ path: string; count: number }>;
+  countryDistribution: Array<{ country: string; count: number }>;
+  methodDistribution: Array<{ method: string; count: number }>;
+  timeSeriesData: Array<{ timestamp: number; value: number }>;
 }
 
 /**
@@ -119,20 +136,7 @@ export interface ISampler {
  * Metrics storage interface
  * Handles persistence and retrieval of request metrics
  */
-export interface IStorage {
-  // Stores individual request metrics
-  storeMetrics(metrics: RequestMetrics): Promise<void>;
-  // Retrieves metrics within time range with optional limit
-  getMetrics(
-    startTime: number,
-    endTime: number,
-    limit: number
-  ): Promise<RequestMetrics[]>;
-  // Gets statistics for a specific path
-  getPathStats(path: string): Promise<any>;
-  // Generates storage keys for given time range
-  getTimeKeys(startTime: number, endTime: number): string[];
-}
+export interface IStorage {}
 
 /**
  * Main middleware interface

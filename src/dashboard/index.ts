@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDashboardHTML } from "./html";
-import { IDashboard, RequestIQConfig } from "../types";
+import { IDashboard, QueryFilters, RequestIQConfig } from "../types";
 import { Authentication } from "../auth";
 import { RedisStorage } from "../storage";
-import { Metrices } from "../metrices";
-import { isValidJSON } from "../utils";
 
 /**
  * handles the dashboard fucntioanlity in request iq:
@@ -18,8 +16,7 @@ export class Dashboard implements IDashboard {
   constructor(
     private config: RequestIQConfig,
     private authentication: Authentication,
-    private storage: RedisStorage,
-    private metrices: Metrices
+    private storage: RedisStorage
   ) {}
 
   // handles dashboard request with authentication
@@ -64,10 +61,11 @@ export class Dashboard implements IDashboard {
       const endTime = Date.now();
       const startTime = endTime - hours * 60 * 60 * 1000;
 
-      const metrics = await this.storage.getMetrics(startTime, endTime, 1000);
-      if (isValidJSON(JSON.stringify(metrics)))
-        return NextResponse.json(metrics);
-      return NextResponse.json({ message: "dashboard data malformed" });
+      const queryFilter: QueryFilters = {
+        timeWindow: { start: startTime, end: endTime, bucket: "minute" },
+      };
+      const metrics = await this.storage.readAnalytics(queryFilter);
+      return NextResponse.json(metrics);
     }
 
     if (action === "dashboard-data") {
@@ -75,12 +73,11 @@ export class Dashboard implements IDashboard {
       const hours = parseInt(searchParams.get("hours") || "24");
       const endTime = Date.now();
       const startTime = endTime - hours * 60 * 60 * 1000;
-
-      const dashboardData = await this.getDashboardData(startTime, endTime);
-
-      if (isValidJSON(JSON.stringify(dashboardData)))
-        return NextResponse.json(dashboardData);
-      return NextResponse.json({ message: "dashboard data malformed" });
+      const queryFilter: QueryFilters = {
+        timeWindow: { start: startTime, end: endTime, bucket: "minute" },
+      };
+      const metrics = await this.storage.readAnalytics(queryFilter);
+      return NextResponse.json(metrics);
     }
 
     return new NextResponse("Not Found", { status: 404 });
@@ -91,40 +88,12 @@ export class Dashboard implements IDashboard {
     startTime: number,
     endTime: number
   ): Promise<any> {
-    const metrics = await this.storage.getMetrics(startTime, endTime, 1000);
-
-    const totalRequests = metrics.length;
-    const averageLatency =
-      metrics.reduce((sum, m) => sum + m.duration, 0) / totalRequests || 0;
-    const slowRequests = metrics.filter(
-      (m) => m.duration > this.config.sampling.slowThreshold
-    ).length;
-    const errorRate =
-      metrics.filter((m) => m.statusCode >= 400).length / totalRequests || 0;
-
-    const requestsByPath = metrics.reduce((acc, m) => {
-      acc[m.path] = (acc[m.path] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const sortedLatencies = metrics
-      .map((m) => m.duration)
-      .sort((a, b) => a - b);
-    const latencyPercentiles = {
-      p50: this.metrices.getPercentile(sortedLatencies, 50),
-      p90: this.metrices.getPercentile(sortedLatencies, 90),
-      p95: this.metrices.getPercentile(sortedLatencies, 95),
-      p99: this.metrices.getPercentile(sortedLatencies, 99),
+    const queryFilter: QueryFilters = {
+      timeWindow: { start: startTime, end: endTime, bucket: "minute" },
     };
 
-    return {
-      totalRequests,
-      averageLatency,
-      slowRequests,
-      errorRate,
-      requestsByPath,
-      latencyPercentiles,
-      recentRequests: metrics.slice(0, 50),
-    };
+    const metrics = await this.storage.readAnalytics(queryFilter);
+
+    return metrics;
   }
 }

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { IMetrices, RequestIQConfig, RequestMetrics } from "../types";
-import { v4 as uuidv4 } from "uuid";
+import { AnalyticsData, IMetrices, RequestIQConfig } from "../types";
 import { RequestSampler } from "../sampler";
 import { RedisStorage } from "../storage";
 
@@ -32,8 +31,7 @@ export class Metrices implements IMetrices {
     }
 
     // request meterices to collect
-    const metrics: RequestMetrics = {
-      id: uuidv4(),
+    const metrics: AnalyticsData = {
       timestamp: startTime,
       path,
       method: request.method,
@@ -42,21 +40,9 @@ export class Metrices implements IMetrices {
       userAgent: request.headers.get("user-agent") as string,
       ip: request.ip || (request.headers.get("x-forwarded-for") as string),
       country: request.geo?.country as string,
-      query: Object.fromEntries(request.nextUrl.searchParams),
     };
 
-    // Include specified headers
-    if (this.config.includeHeaders) {
-      metrics.headers = {};
-      for (const headerName of this.config.includeHeaders) {
-        const value = request.headers.get(headerName);
-        if (value) {
-          metrics.headers[headerName] = value;
-        }
-      }
-    }
-
-    await this.storage.storeMetrics(metrics);
+    await this.storage.writeAnalytics(metrics);
   }
 
   // return the precentile of the request
