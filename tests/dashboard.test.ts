@@ -106,4 +106,18 @@ describe("Dashboard", () => {
     const res = await dashboard.handleDashboardAPI(req);
     expect(res.status).toBe(404);
   });
+
+  it("parses the correct apiPath from request URL", async () => {
+    const req = mockRequest(
+      "http://localhost/requestiq/api/metrics?test=1&test=2"
+    );
+    const spy = jest.spyOn(dashboard as any, "getDashboardData");
+    storage.getMetrics.mockResolvedValue([]);
+
+    // Ensure we don't hit getDashboardData (because this is the metrics path)
+    await dashboard.handleDashboardAPI(req);
+
+    expect(storage.getMetrics).toHaveBeenCalled();
+    expect(spy).not.toHaveBeenCalled(); // not called unless path is dashboard-data
+  });
 });
