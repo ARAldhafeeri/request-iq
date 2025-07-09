@@ -23,7 +23,7 @@ export class RequestIQMiddleware {
    * @param request - The incoming Next.js request object
    * @returns A NextResponse object representing the middleware outcome
    */
-  async handle(request: NextRequest): Promise<NextResponse> {
+  async handle(request: NextRequest) {
     const start = Date.now();
     const path = request.nextUrl.pathname;
 

@@ -3,7 +3,7 @@ import { RequestIQMiddleware } from "./middleware";
 import { RequestSampler } from "./sampler";
 import { RedisStorage } from "./storage";
 import { RequestIQConfig } from "./types";
-import { redis } from "./storage/client";
+import { createRedisClient } from "./storage/client";
 import { Dashboard } from "./dashboard";
 import { Metrices } from "./metrices";
 
@@ -34,7 +34,10 @@ export const defaultConfig: RequestIQConfig = {
 export function createRequestIQ(config: RequestIQConfig) {
   const sampler = new RequestSampler(config);
   const auth = new Authentication(config);
-  const storage = new RedisStorage(config, redis);
+  const storage = new RedisStorage(
+    config,
+    createRedisClient(config.redis.url, config.redis.token)
+  );
   const metrices = new Metrices(config, sampler, storage);
   const dashboard = new Dashboard(config, auth, storage, metrices);
   return new RequestIQMiddleware(config, sampler, dashboard, metrices);

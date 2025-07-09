@@ -1,6 +1,6 @@
 {
-  "name": "request-iq",
-  "version": "1.0.0",
+  "name": "next-request-iq",
+  "version": "1.0.1",
   "description": "Minimal serverless-friendly middleware for tracking endpoint performance and latency. Comes with simple clean analytics dashboard without paying any premium price, it's simply free.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
