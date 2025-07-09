@@ -33,7 +33,7 @@ export class RedisStorage {
 
   private async updatePathStats(metrics: RequestMetrics): Promise<void> {
     const pathKey = `requestiq:path:${metrics.path}`;
-    const statsKey = `requestiq:stats:${metrics.path}`;
+    // const _statsKey = `requestiq:stats:${metrics.path}`;
 
     // Increment request count
     await this.redis.incr(`${pathKey}:count`);
@@ -58,24 +58,30 @@ export class RedisStorage {
     endTime: number,
     limit: number = 100
   ): Promise<RequestMetrics[]> {
+    // Upstash alternative approach - using ZRANGE with BYSCORE
+    // First get all keys that might contain our data
     const timeKeys = this.getTimeKeys(startTime, endTime);
-    const metricIds: string[] = [];
 
-    for (const timeKey of timeKeys) {
-      // const ids = await this.redis.zrangebyscore(timeKey, startTime, endTime, {
-      //   count: limit,
-      // });
-      // metricIds.push(...ids);
-    }
+    // Parallelize the ZRANGE calls (Upstash supports ZRANGE with BYSCORE)
+    const idPromises = timeKeys.map((timeKey) =>
+      this.redis.zrange(timeKey, startTime, endTime)
+    );
 
-    const metrics: RequestMetrics[] = [];
-    for (const id of metricIds.slice(0, limit)) {
-      const data = await this.redis.get(`requestiq:metrics:${id}`);
-      if (data) {
-        metrics.push(JSON.parse(data as string));
-      }
-    }
+    // Get all unique IDs (Upstash returns string[])
+    const idArrays = await Promise.all(idPromises);
+    const uniqueIds = [...new Set(idArrays.flat())].slice(0, limit);
 
+    // Batch get all metrics in parallel
+    const metricPromises = uniqueIds.map(
+      (id) =>
+        this.redis
+          .get(`requestiq:metrics:${id}`)
+          .then((data) => (data ? JSON.parse(data as string) : null))
+          .catch(() => null) // Prevent individual failures from breaking everything
+    );
+
+    // Filter out nulls and sort
+    const metrics = (await Promise.all(metricPromises)).filter(Boolean);
     return metrics.sort((a, b) => b.timestamp - a.timestamp);
   }
 

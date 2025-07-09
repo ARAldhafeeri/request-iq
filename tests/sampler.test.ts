@@ -36,7 +36,7 @@ describe("RequestSampler", () => {
 
   describe("shouldExcludePath", () => {
     it("should return false if no excludePaths are defined", () => {
-      config.excludePaths = undefined;
+      config.excludePaths = [];
       sampler = new RequestSampler(config);
       expect(sampler.shouldExcludePath("/api/test")).toBe(false);
     });

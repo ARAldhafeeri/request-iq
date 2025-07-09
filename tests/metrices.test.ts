@@ -36,10 +36,10 @@ const mockResponse = (status: number): NextResponse =>
   } as NextResponse);
 
 describe("Metrices", () => {
-  let config;
-  let sampler;
-  let storage;
-  let metrices: Metrices;
+  let config: any;
+  let sampler: any;
+  let storage: any;
+  let metrices: any;
 
   beforeEach(() => {
     config = {

@@ -2,7 +2,7 @@ import { Authentication } from "./auth";
 import { RequestIQMiddleware } from "./middleware";
 import { RequestSampler } from "./sampler";
 import { RedisStorage } from "./storage";
-import { RequestIQConfig, RequestMetrics, DashboardData } from "./types";
+import { RequestIQConfig } from "./types";
 import { redis } from "./storage/client";
 import { Dashboard } from "./dashboard";
 import { Metrices } from "./metrices";

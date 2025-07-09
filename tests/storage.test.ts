@@ -13,7 +13,7 @@ const mockRedis = () => ({
 });
 
 describe("RedisStorage", () => {
-  let redis;
+  let redis: any;
   let config: RequestIQConfig;
   let storage: RedisStorage;
   let sampleMetrics: RequestMetrics;
@@ -95,7 +95,7 @@ describe("RedisStorage", () => {
 
   describe("getPathStats", () => {
     it("should return parsed stats", async () => {
-      redis.get.mockImplementation((key) => {
+      redis.get.mockImplementation((key: string) => {
         if (key.includes(":count")) return Promise.resolve("20");
         if (key.includes(":errors")) return Promise.resolve("4");
         if (key.includes(":slow")) return Promise.resolve("5");

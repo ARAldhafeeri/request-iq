@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { IMetrices, RequestIQConfig, RequestMetrics } from "../types";
 import { v4 as uuidv4 } from "uuid";
+import { RequestSampler } from "../sampler";
+import { RedisStorage } from "../storage";
 
 export class Metrices implements IMetrices {
   constructor(
     private config: RequestIQConfig,
-    private sampler,
-    private storage
+    private sampler: RequestSampler,
+    private storage: RedisStorage
   ) {}
 
   // method called to collect metrices on every request.
@@ -37,9 +39,9 @@ export class Metrices implements IMetrices {
       method: request.method,
       statusCode,
       duration,
-      userAgent: request.headers.get("user-agent") || undefined,
-      ip: request.ip || request.headers.get("x-forwarded-for") || undefined,
-      country: request.geo?.country || undefined,
+      userAgent: request.headers.get("user-agent") as string,
+      ip: request.ip || (request.headers.get("x-forwarded-for") as string),
+      country: request.geo?.country as string,
       query: Object.fromEntries(request.nextUrl.searchParams),
     };
 

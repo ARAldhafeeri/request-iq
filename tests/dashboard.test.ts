@@ -1,5 +1,5 @@
 import { Dashboard } from "../src/dashboard";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { defaultConfig } from "../src";
 
@@ -19,11 +19,11 @@ const mockRequest = (url: string, headers: Record<string, string> = {}) =>
   } as unknown as NextRequest);
 
 describe("Dashboard", () => {
-  let config;
-  let auth;
-  let storage;
-  let metrices;
-  let dashboard;
+  let config: any;
+  let auth: any;
+  let storage: any;
+  let metrices: any;
+  let dashboard: any;
 
   beforeEach(() => {
     config = defaultConfig;

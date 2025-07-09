@@ -7,7 +7,7 @@ export class RequestSampler implements ISampler {
     this.config = config;
   }
 
-  shouldSample(path: string, duration?: number): boolean {
+  shouldSample(_path: string, duration?: number): boolean {
     // Always sample slow requests
     if (duration && duration > this.config.sampling.slowThreshold) {
       return true;
