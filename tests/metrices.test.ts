@@ -62,7 +62,7 @@ describe("Metrices", () => {
   });
 
   it("should store metrics if sampled by sampler", async () => {
-    const req = mockRequest("/api/hello", {
+    const req = mockRequest("/v1/hello", {
       headers: { "user-agent": "jest", "x-custom-header": "abc" },
       ip: "127.0.0.1",
       geo: { country: "KW" },
@@ -80,7 +80,7 @@ describe("Metrices", () => {
         method: "GET",
         statusCode: 200,
         duration: expect.any(Number),
-        path: "/api/hello",
+        path: "/v1/hello",
         ip: "127.0.0.1",
         country: "KW",
         userAgent: "jest",

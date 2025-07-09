@@ -16,21 +16,21 @@ describe("RequestSampler", () => {
 
   describe("shouldSample", () => {
     it("should sample if duration exceeds slowThreshold", () => {
-      const result = sampler.shouldSample("/api/test", 600);
+      const result = sampler.shouldSample("/v1/test", 600);
       expect(result).toBe(true);
     });
 
     it("should sample based on random rate when duration is below threshold", () => {
       jest.spyOn(Math, "random").mockReturnValue(0.3); // less than rate (0.5)
-      expect(sampler.shouldSample("/api/test", 200)).toBe(true);
+      expect(sampler.shouldSample("/v1/test", 200)).toBe(true);
 
       jest.spyOn(Math, "random").mockReturnValue(0.7); // more than rate
-      expect(sampler.shouldSample("/api/test", 200)).toBe(false);
+      expect(sampler.shouldSample("/v1/test", 200)).toBe(false);
     });
 
     it("should sample based on rate if duration is undefined", () => {
       jest.spyOn(Math, "random").mockReturnValue(0.2);
-      expect(sampler.shouldSample("/api/no-duration")).toBe(true);
+      expect(sampler.shouldSample("/v1/no-duration")).toBe(true);
     });
   });
 
@@ -38,7 +38,7 @@ describe("RequestSampler", () => {
     it("should return false if no excludePaths are defined", () => {
       config.excludePaths = [];
       sampler = new RequestSampler(config);
-      expect(sampler.shouldExcludePath("/api/test")).toBe(false);
+      expect(sampler.shouldExcludePath("/v1/test")).toBe(false);
     });
 
     it("should return true for exact match", () => {
@@ -59,7 +59,7 @@ describe("RequestSampler", () => {
     it("should return false if no path matches", () => {
       config.excludePaths = ["/auth", "/config"];
       sampler = new RequestSampler(config);
-      expect(sampler.shouldExcludePath("/api/user")).toBe(false);
+      expect(sampler.shouldExcludePath("/v1/user")).toBe(false);
     });
   });
 });

@@ -46,7 +46,7 @@ describe("Dashboard", () => {
   it("returns 401 if auth is enabled and header is invalid", async () => {
     config.dashboard.enableAuth = true;
     auth.isValidAuth.mockReturnValue(false);
-    const req = mockRequest("http://localhost/requestiq/api/");
+    const req = mockRequest("http://localhost/requestiq");
     const res = await dashboard.handleDashboard(req);
     expect(res.status).toBe(401);
     config.dashboard.enableAuth = false;
@@ -62,13 +62,15 @@ describe("Dashboard", () => {
   it("calls handleDashboardAPI for API routes", async () => {
     config.dashboard.auth = undefined;
     const spy = jest.spyOn(dashboard, "handleDashboardAPI");
-    const req = mockRequest("http://localhost/requestiq/api/metrics");
+    const req = mockRequest("http://localhost/requestiq?action=metrics");
     await dashboard.handleDashboard(req);
     expect(spy).toHaveBeenCalled();
   });
 
-  it("returns metrics data for /api/metrics route", async () => {
-    const req = mockRequest("http://localhost/requestiq/api/metrics?hours=1");
+  it("returns metrics data for /v1/metrics route", async () => {
+    const req = mockRequest(
+      "http://localhost/requestiq?hours=1&action=metrics"
+    );
     const fakeMetrics = [
       { duration: 100, path: "/a", statusCode: 200 },
       { duration: 600, path: "/b", statusCode: 500 },
@@ -79,9 +81,9 @@ describe("Dashboard", () => {
     expect(json).toEqual(fakeMetrics);
   });
 
-  it("returns dashboard data for /api/dashboard-data route", async () => {
+  it("returns dashboard data for /v1/dashboard-data route", async () => {
     const req = mockRequest(
-      "http://localhost/requestiq/api/dashboard-data?hours=1"
+      "http://localhost/requestiq?action=dashboard-data&hours=1"
     );
     const metrics = [
       { duration: 200, path: "/a", statusCode: 200 },
@@ -102,14 +104,14 @@ describe("Dashboard", () => {
   });
 
   it("returns 404 for unknown api routes", async () => {
-    const req = mockRequest("http://localhost/requestiq/api/unknown");
+    const req = mockRequest("http://localhost/requestiq?action=unknown");
     const res = await dashboard.handleDashboardAPI(req);
     expect(res.status).toBe(404);
   });
 
   it("parses the correct apiPath from request URL", async () => {
     const req = mockRequest(
-      "http://localhost/requestiq/api/metrics?test=1&test=2"
+      "http://localhost/requestiq?action=metrics&test=1&test=2"
     );
     const spy = jest.spyOn(dashboard as any, "getDashboardData");
     storage.getMetrics.mockResolvedValue([]);
@@ -123,29 +125,5 @@ describe("Dashboard", () => {
 
   it("should log the actual config path value", () => {
     expect(config.dashboard.path).toBeDefined();
-  });
-
-  it("should handle different path configurations", async () => {
-    const testCases = [
-      { path: "/requestiq", url: "http://localhost/requestiq/api/metrics" },
-      { path: "requestiq", url: "http://localhost/requestiq/api/metrics" },
-      { path: "/requestiq/", url: "http://localhost/requestiq/api/metrics" },
-      { path: "", url: "http://localhost/api/metrics" },
-      { path: "/", url: "http://localhost/api/metrics" },
-    ];
-
-    for (const testCase of testCases) {
-      config.dashboard.path = testCase.path;
-      config.dashboard.enableAuth = false;
-
-      const req = mockRequest(testCase.url);
-      const expectedPrefix = `${testCase.path}/api/`;
-
-      const res = await dashboard.handleDashboard(req);
-
-      if (req.nextUrl.pathname.startsWith(expectedPrefix)) {
-        expect(res.status).not.toBe(404);
-      }
-    }
   });
 });

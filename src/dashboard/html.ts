@@ -93,7 +93,7 @@ export const getDashboardHTML = (dashboardPath: string) => {
       async function loadDashboard() {
           const hours = document.getElementById('timeFilter').value;
           try {
-              const response = await fetch(\`${dashboardPath}/api/dashboard-data?hours=\${hours}\`);
+              const response = await fetch(\`${dashboardPath}?action=dashboard-data&hours=\${hours}\`);
               const data = await response.json();
               
               document.getElementById('totalRequests').textContent = data.totalRequests.toLocaleString();

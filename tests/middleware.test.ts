@@ -58,7 +58,7 @@ describe("RequestIQMiddleware", () => {
   });
 
   it("should collect metrics for non-dashboard, non-excluded requests", async () => {
-    const req = mockRequest("/api/users");
+    const req = mockRequest("/v1/users");
     const res = await middleware.handle(req);
 
     expect(metrices.collectMetrics).toHaveBeenCalledWith(
@@ -75,7 +75,7 @@ describe("RequestIQMiddleware", () => {
       .mockImplementation(() => {});
     metrices.collectMetrics.mockRejectedValue(new Error("Metrics failed"));
 
-    const req = mockRequest("/api/fail");
+    const req = mockRequest("/v1/fail");
     await middleware.handle(req);
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));

@@ -36,7 +36,7 @@ describe("RedisStorage", () => {
     sampleMetrics = {
       id: "metric123",
       timestamp: 1720000000000,
-      path: "/api/test",
+      path: "/v1/test",
       method: "GET",
       statusCode: 200,
       duration: 300,
@@ -69,13 +69,13 @@ describe("RedisStorage", () => {
         secondsTTL
       );
 
-      expect(redis.incr).toHaveBeenCalledWith("requestiq:path:/api/test:count");
+      expect(redis.incr).toHaveBeenCalledWith("requestiq:path:/v1/test:count");
       expect(redis.lpush).toHaveBeenCalledWith(
-        "requestiq:path:/api/test:latencies",
+        "requestiq:path:/v1/test:latencies",
         300
       );
       expect(redis.ltrim).toHaveBeenCalledWith(
-        "requestiq:path:/api/test:latencies",
+        "requestiq:path:/v1/test:latencies",
         0,
         1000
       );
@@ -86,10 +86,8 @@ describe("RedisStorage", () => {
 
       await storage.storeMetrics(errorMetrics);
 
-      expect(redis.incr).toHaveBeenCalledWith(
-        "requestiq:path:/api/test:errors"
-      );
-      expect(redis.incr).toHaveBeenCalledWith("requestiq:path:/api/test:slow");
+      expect(redis.incr).toHaveBeenCalledWith("requestiq:path:/v1/test:errors");
+      expect(redis.incr).toHaveBeenCalledWith("requestiq:path:/v1/test:slow");
     });
   });
 
@@ -104,7 +102,7 @@ describe("RedisStorage", () => {
 
       redis.lrange.mockResolvedValue(["100", "200", "300"]);
 
-      const stats = await storage.getPathStats("/api/test");
+      const stats = await storage.getPathStats("/v1/test");
 
       expect(stats).toEqual({
         count: 20,
@@ -118,7 +116,7 @@ describe("RedisStorage", () => {
       redis.get.mockResolvedValue(undefined);
       redis.lrange.mockResolvedValue([]);
 
-      const stats = await storage.getPathStats("/api/unknown");
+      const stats = await storage.getPathStats("/v1/unknown");
 
       expect(stats).toEqual({
         count: 0,

@@ -37,10 +37,11 @@ export class Dashboard implements IDashboard {
       }
     }
 
+    const searchParams = request.nextUrl.searchParams;
+    const action = searchParams.get("action");
+
     // Handle API routes
-    if (
-      request.nextUrl.pathname.startsWith(`${this.config.dashboard.path}/api/`)
-    ) {
+    if (action === "dashboard-data" || action === "metrices") {
       return this.handleDashboardAPI(request);
     }
 
@@ -54,17 +55,10 @@ export class Dashboard implements IDashboard {
 
   // dashboard api requests
   public async handleDashboardAPI(request: NextRequest) {
-    const pathname = request.nextUrl.pathname;
-    const apiPrefix = `${this.config.dashboard.path}/api`;
-    /**
-     * Get dashboard/api routes:
-     * metrices
-     * dashboard-data
-     *
-     */
-    const apiPath = pathname.slice(apiPrefix.length + 1);
+    const searchParams = request.nextUrl.searchParams;
+    const action = searchParams.get("action");
 
-    if (apiPath === "/metrics") {
+    if (action === "metrics") {
       const searchParams = request.nextUrl.searchParams;
       const hours = parseInt(searchParams.get("hours") || "24");
       const endTime = Date.now();
@@ -76,13 +70,14 @@ export class Dashboard implements IDashboard {
       return NextResponse.json({ message: "dashboard data malformed" });
     }
 
-    if (apiPath === "/dashboard-data") {
+    if (action === "dashboard-data") {
       const searchParams = request.nextUrl.searchParams;
       const hours = parseInt(searchParams.get("hours") || "24");
       const endTime = Date.now();
       const startTime = endTime - hours * 60 * 60 * 1000;
 
       const dashboardData = await this.getDashboardData(startTime, endTime);
+
       if (isValidJSON(JSON.stringify(dashboardData)))
         return NextResponse.json(dashboardData);
       return NextResponse.json({ message: "dashboard data malformed" });
